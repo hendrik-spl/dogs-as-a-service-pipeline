@@ -1,0 +1,14 @@
+# Get this file from the dbt Cloud CLI Setup
+
+version: "1"
+context:
+  active-host: ""
+  active-project: ""
+projects:
+  - project-name: ""
+    project-id: ""
+    account-name: ""
+    account-id: ""
+    account-host: ""
+    token-name: ""
+    token-value: ""

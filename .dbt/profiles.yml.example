@@ -1,0 +1,42 @@
+# BigQuery dbt profile configuration template
+# Copy this file to ~/.dbt/profiles.yml and update with your project details
+
+dog_breed_explorer:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: YOUR_PROJECT_ID
+      dataset: dog_explorer_dev     # Development dataset
+      threads: 4
+      timeout_seconds: 300
+      location: US                  # or your preferred region (e.g., europe-north2)
+      priority: interactive
+      keyfile: /path/to/your/dbt-sa.json
+      
+    prod:
+      type: bigquery
+      method: service-account
+      project: YOUR_PROJECT_ID
+      dataset: dog_explorer         # Production dataset
+      threads: 8
+      timeout_seconds: 300
+      location: US                  # or your preferred region (e.g., europe-north2)
+      priority: interactive
+      keyfile: /path/to/your/dbt-sa.json
+
+# Alternative: Using Application Default Credentials (ADC)
+# Uncomment and use this instead of service-account method for production
+# dog_breed_explorer:
+#   target: prod
+#   outputs:
+#     prod:
+#       type: bigquery
+#       method: oauth
+#       project: YOUR_PROJECT_ID
+#       dataset: dog_explorer
+#       threads: 8
+#       timeout_seconds: 300
+#       location: US
+#       priority: interactive

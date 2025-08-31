@@ -1,0 +1,67 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    environment: production
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+    
+    - name: Install dependencies
+      run: uv sync
+    
+    - name: Set up Google Cloud credentials
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+    
+    - name: Create dbt profiles directory
+      run: mkdir -p ~/.dbt
+    
+    - name: Create dbt profiles.yml for Production
+      run: |
+        cat > ~/.dbt/profiles.yml << EOF
+        dog_breed_explorer:
+          target: prod
+          outputs:
+            prod:
+              type: bigquery
+              method: service-account
+              project: ${{ secrets.DBT_PROJECT_ID || 'dog-breed-explorer-470208' }}
+              dataset: ${{ secrets.DBT_DATASET_PROD || 'dog_explorer' }}
+              threads: 8
+              timeout_seconds: 300
+              location: europe-north2
+              priority: interactive
+              keyfile: ${{ steps.auth.outputs.credentials_file_path }}
+        EOF
+    
+    - name: Run dbt deps
+      run: uv run dbt deps
+    
+    - name: Run dbt compile
+      run: uv run dbt compile --target prod
+    
+    - name: Run dbt run (production)
+      run: uv run dbt run --target prod
+    
+    - name: Run dbt test (production)
+      run: uv run dbt test --target prod

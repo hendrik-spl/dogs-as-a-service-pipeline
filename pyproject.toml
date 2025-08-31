@@ -1,0 +1,16 @@
+[project]
+name = "dogs-as-a-service-pipeline"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dbt-bigquery>=1.8,<1.9",
+    "dlt[bigquery,gcs]>=1.15.0",
+    "functions-framework>=3.9.2",
+    "gcloud>=0.18.3",
+    "google-cloud-bigquery-storage>=2.32.0",
+    "ipykernel>=6.30.1",
+    "openai>=1.102.0",
+    "streamlit>=1.49.0",
+]

@@ -1,0 +1,56 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: "Raw data layer containing dog breed data from TheDogAPI"
+    database: "{{ target.project }}"
+    schema: "{{ var('source_dataset') }}"
+    tables:
+      - name: dog_breeds
+        description: "Raw dog breed data extracted from TheDogAPI via dlt pipeline"
+        columns:
+          - name: _dlt_load_id
+            description: "DLT load identifier for tracking data lineage"
+          - name: _dlt_id
+            description: "DLT unique row identifier"
+          - name: extracted_at
+            description: "Timestamp when data was extracted from the API"
+          - name: extraction_date
+            description: "Date of data extraction"
+          - name: id
+            description: "Unique breed ID from TheDogAPI"
+          - name: name
+            description: "Breed name"
+          - name: bred_for
+            description: "Original purpose the breed was developed for"
+          - name: breed_group
+            description: "AKC breed group classification"
+          - name: life_span
+            description: "Typical lifespan range (e.g., '10 - 12 years')"
+          - name: temperament
+            description: "Comma-separated list of temperament traits"
+          - name: origin
+            description: "Country or region of origin"
+          - name: weight__imperial
+            description: "Weight range in pounds (e.g., '35 - 70')"
+          - name: weight__metric
+            description: "Weight range in kilograms (e.g., '16 - 32')"
+          - name: height__imperial
+            description: "Height range in inches (e.g., '24 - 27')"
+          - name: height__metric
+            description: "Height range in centimeters (e.g., '61 - 69')"
+          - name: reference_image_id
+            description: "TheDogAPI reference image identifier"
+          - name: country_code
+            description: "ISO country code for breed origin"
+          - name: description
+            description: "Detailed breed description"
+          - name: history
+            description: "Historical information about the breed"
+
+        tests:
+          - dbt_utils.recency:
+              arguments:
+                datepart: day
+                field: extracted_at
+                interval: 7

@@ -1,0 +1,320 @@
+version: 2
+
+models:
+  - name: dim_breeds
+    description: "Master dimension table containing comprehensive breed information with derived characteristics"
+    columns:
+      - name: breed_id
+        description: "Unique breed identifier (primary key)"
+        tests:
+          - unique
+          - not_null
+          
+      - name: breed_name
+        description: "Standardized breed name"
+        tests:
+          - not_null
+          - unique
+          
+      - name: breed_group
+        description: "AKC breed group classification"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Sporting', 'Hound', 'Working', 'Terrier', 'Toy', 'Non-Sporting', 'Herding', 'Mixed', '']
+              
+      - name: bred_for
+        description: "Original purpose the breed was developed for"
+        
+      - name: origin
+        description: "Country or region where the breed originated"
+        
+      - name: country_code
+        description: "ISO country code for breed origin"
+        
+      - name: size_category
+        description: "Breed size classification based on weight"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Very Small', 'Small', 'Medium', 'Large', 'Extra Large']
+              
+      - name: avg_weight_lbs
+        description: "Average weight in pounds"
+        
+      - name: avg_weight_kg
+        description: "Average weight in kilograms"
+        
+      - name: avg_height_inches
+        description: "Average height in inches"
+        
+      - name: avg_height_cm
+        description: "Average height in centimeters"
+        
+      - name: avg_life_span_years
+        description: "Average lifespan in years"
+        
+      - name: temperament_trait_count
+        description: "Number of temperament traits listed for this breed"
+        
+      - name: longevity_category
+        description: "Longevity classification based on average lifespan"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Long-lived', 'Average lifespan', 'Moderate lifespan', 'Short-lived']
+              
+      - name: inferred_activity_level
+        description: "Estimated activity level based on breed group and purpose"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['High', 'Medium-High', 'Medium', 'Low-Medium', 'Unknown']
+              
+      - name: family_friendliness
+        description: "Family suitability based on temperament analysis"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Family-Friendly', 'Protective/Guardian', 'Moderate', 'Unknown']
+              
+      - name: data_completeness_score
+        description: "Data quality score from 0-4 based on available metrics"
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 4
+
+    tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "data_completeness_score >= 0 and data_completeness_score <= 4"
+          
+  - name: fct_breed_metrics
+    description: "Fact table focused on measurable breed characteristics and derived metrics"
+    columns:
+      - name: breed_id
+        description: "Breed identifier (foreign key to dim_breeds)"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_breeds')
+                field: breed_id
+              
+      - name: breed_name
+        description: "Breed name for reference"
+        tests:
+          - not_null
+          
+      - name: weight_min_lbs
+        description: "Minimum weight in pounds"
+        
+      - name: weight_max_lbs
+        description: "Maximum weight in pounds"
+        
+      - name: weight_range_lbs
+        description: "Weight range (max - min) in pounds"
+        
+      - name: height_min_inches
+        description: "Minimum height in inches"
+        
+      - name: height_max_inches
+        description: "Maximum height in inches"
+        
+      - name: height_range_inches
+        description: "Height range (max - min) in inches"
+        
+      - name: life_span_min_years
+        description: "Minimum typical lifespan in years"
+        
+      - name: life_span_max_years
+        description: "Maximum typical lifespan in years"
+        
+      - name: life_span_range_years
+        description: "Lifespan range (max - min) in years"
+        
+      - name: avg_weight_lbs
+        description: "Average weight in pounds"
+        
+      - name: avg_height_inches
+        description: "Average height in inches"
+        
+      - name: avg_life_span_years
+        description: "Average lifespan in years"
+        
+      - name: weight_height_ratio_imperial
+        description: "Weight to height ratio (imperial units)"
+        
+      - name: build_type
+        description: "Physical build classification based on weight-height ratio"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Heavy Build', 'Sturdy Build', 'Balanced Build', 'Lean Build', 'Very Lean Build']
+              
+      - name: weight_consistency
+        description: "Assessment of weight variation within breed"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Consistent Size', 'Moderate Variation', 'High Variation']
+              
+      - name: height_consistency
+        description: "Assessment of height variation within breed"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Consistent Size', 'Moderate Variation', 'High Variation']
+              
+      - name: lifespan_predictability
+        description: "Assessment of lifespan variation within breed"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Predictable Lifespan', 'Moderate Variation', 'High Variation']
+              
+      - name: metrics_completeness_score
+        description: "Completeness score for physical metrics (0-1)"
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+
+    tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "weight_min_lbs <= weight_max_lbs or weight_min_lbs is null or weight_max_lbs is null"
+          
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "height_min_inches <= height_max_inches or height_min_inches is null or height_max_inches is null"
+          
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "life_span_min_years <= life_span_max_years or life_span_min_years is null or life_span_max_years is null"
+
+  - name: dim_temperament
+    description: "Dimension table analyzing temperament patterns and behavioral characteristics"
+    columns:
+      - name: breed_id
+        description: "Breed identifier (foreign key to dim_breeds)"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_breeds')
+                field: breed_id
+              
+      - name: breed_name
+        description: "Breed name for reference"
+        tests:
+          - not_null
+          
+      - name: temperament_raw
+        description: "Original comma-separated temperament string"
+        
+      - name: total_traits
+        description: "Total number of temperament traits listed"
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 20
+              
+      - name: trait_array
+        description: "Array of individual temperament traits"
+        
+      - name: social_score
+        description: "Social/friendly temperament score (0-1)"
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+              
+      - name: energy_score
+        description: "Energy level temperament score (0-1)"
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+              
+      - name: intelligence_score
+        description: "Intelligence/trainability temperament score (0-1)"
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+              
+      - name: protective_score
+        description: "Protective/guardian temperament score (0-1)"
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+              
+      - name: independent_score
+        description: "Independence/stubbornness temperament score (0-1)"
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+              
+      - name: calm_score
+        description: "Calm/gentle temperament score (0-1)"
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+              
+      - name: family_friendliness_score
+        description: "Family suitability temperament score (0-1)"
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+              
+      - name: working_score
+        description: "Working dog temperament score (0-1)"
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+              
+      - name: primary_temperament_category
+        description: "Primary temperament classification"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Social/Friendly', 'High-Energy/Active', 'Intelligent/Trainable', 'Protective/Guardian', 'Independent/Strong-Willed', 'Calm/Gentle', 'Unclassified']
+              
+      - name: temperament_complexity
+        description: "Complexity of temperament profile"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Complex', 'Moderate', 'Simple', 'Minimal']
+              
+      - name: family_suitability
+        description: "Overall family suitability assessment"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Excellent for Families', 'Good for Families', 'Moderate for Families', 'Good Guard Dog', 'Needs Experienced Owner']
+              
+      - name: training_difficulty
+        description: "Estimated training difficulty"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Easy to Train', 'Moderate to Train', 'Challenging to Train', 'Very Challenging to Train']

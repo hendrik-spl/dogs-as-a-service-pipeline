@@ -205,3 +205,71 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ignore secrets, virtual environments and typical python compilation artifacts
+secrets.toml
+# ignore basic python artifacts
+.env
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+# ignore duckdb
+*.duckdb
+*.wal
+dbt_internal_packages/
+
+# Additional secrets and credentials
+*.secret
+*.secrets
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.der
+*.jks
+*.keystore
+*.bks
+secrets/
+credentials/
+.secrets/
+.env.local
+.env.*.local
+.env.production
+
+# dbt build artifacts and logs
+target/
+dbt_packages/
+logs/
+dbt.log
+manifest.json
+catalog.json
+run_results.json
+
+# Jupyter/data artifacts
+.ipynb_checkpoints/
+*.csv
+*.parquet
+*.jsonl
+*.ndjson
+eda_testing.ipynb
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Python virtual envs (redundant but explicit)
+.venv/
+venv/
+env/
+
+# dbt
+.dbt/profiles.yml
+.dbt/dbt_cloud.yml
+.dbt/logs/
+.dbt/.user.yml
+
+# Secrets
+dbt-sa.json
